@@ -1,17 +1,17 @@
 import json
 
 class User:
-    def __init__(self,username,password , id):
+    def __init__(self, username, password, user_id):
         self.username = username
         self.password = password
-        self.id = id
-
-    def register_user(self, username, password, id):
+        self.user_id = user_id
+    @staticmethod
+    def register_user(self, username, password, user_id):
         with open("user_data.json", "r") as read_file:
             data = json.load(read_file)
 
         new_user = {
-            "user_id": id,
+            "user_id": user_id,
             "username": username,
             "password": password
         }
@@ -19,7 +19,7 @@ class User:
         user_exists = False
 
         for user in data["users"]:
-            if user["user_id"] == id:
+            if user["user_id"] == user_id:
                 user_exists = True
                 break
 
@@ -33,13 +33,28 @@ class User:
         else:
             print("This user ID already exists")
 
-        def Check_User_Exists(self, user_id):
-            with open("user_data.json", "r") as read_file:
-                data = json.load(read_file)
+    @staticmethod
+    def check_user_exists(self, user_id):
+        with open("user_data.json", "r") as read_file:
+            data = json.load(read_file)
 
-            for user in data["users"]:
-                if user["user_id"] == user_id:
+        for user in data["users"]:
+            if user["user_id"] == user_id:
+                return True
+
+        return False
+
+    @staticmethod
+    def login(self, username, password):
+        with open("user_data.json", "r") as read_file:
+            data = json.load(read_file)
+
+        for user in data["users"]:
+            if user["username"] == username:
+                if user["password"] == password:
                     return True
+                else:
+                    return False
 
-            return False
+        return False
 
