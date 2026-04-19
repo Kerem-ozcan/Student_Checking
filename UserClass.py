@@ -1,20 +1,25 @@
 import json
 
+
 class User:
     def __init__(self, username, password, user_id):
         self.username = username
         self.password = password
         self.user_id = user_id
+
+    def to_dict(self):
+        return {
+            "user_id": self.user_id,
+            "username": self.username,
+            "password": self.password
+        }
+
     @staticmethod
-    def register_user(self, username, password, user_id):
+    def register_user(username, password, user_id):
         with open("user_data.json", "r") as read_file:
             data = json.load(read_file)
 
-        new_user = {
-            "user_id": user_id,
-            "username": username,
-            "password": password
-        }
+        new_user = User(username, password, user_id).to_dict()
 
         user_exists = False
 
@@ -34,7 +39,7 @@ class User:
             print("This user ID already exists")
 
     @staticmethod
-    def check_user_exists(self, user_id):
+    def check_user_exists(user_id):
         with open("user_data.json", "r") as read_file:
             data = json.load(read_file)
 
@@ -45,7 +50,7 @@ class User:
         return False
 
     @staticmethod
-    def login(self, username, password):
+    def login(username, password):
         with open("user_data.json", "r") as read_file:
             data = json.load(read_file)
 
