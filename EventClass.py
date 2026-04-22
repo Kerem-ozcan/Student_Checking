@@ -32,11 +32,11 @@ class Event:
         events = cursor.fetchall()
         conn.close()
         return events
-        @staticmethod
-        def get_event_with_user_id(User_id): 
-            conn = Event.get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM events WHERE user_id = ?', (user_id,))
-            events = cursor.fetchall()
-            conn.close()
-            return events
+     @staticmethod
+    def get_event_with_user_id(User_id): 
+        conn = Event.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM events WHERE user_id = ?', (user_id,))
+        events = cursor.fetchall()
+        conn.close()
+        return events
