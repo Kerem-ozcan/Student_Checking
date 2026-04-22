@@ -1,4 +1,8 @@
 import sqlite3
+from pathlib import Path
+
+
+DB_PATH = Path(__file__).with_name('student_checking.db')
 
 
 class User:
@@ -9,13 +13,15 @@ class User:
 
     @staticmethod
     def get_db_connection():
-        return sqlite3.connect('student_checking.db')
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute('PRAGMA foreign_keys = ON')
+        return conn
 
     @staticmethod
     def register_user(username, password, user_id):
         conn = User.get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE user_id = ?', (user_id,))
+        cursor.execute('SELECT * FROM users WHERE user_id = ? OR username = ?', (user_id, username))
         if cursor.fetchone():
             conn.close()
             return False
