@@ -15,6 +15,15 @@ class Event:
         self.start_time = start_time
         self.end_time = end_time
 
+    def get_event_type(self):
+        return "General Event"
+
+    def get_details(self):
+        return (
+            f"{self.get_event_type()}: {self.title} on {self.date} "
+            f"from {self.start_time} to {self.end_time}"
+        )
+
     @staticmethod
     def get_db_connection():
         conn = sqlite3.connect(DB_PATH)
@@ -49,3 +58,27 @@ class Event:
         events = cursor.fetchall()
         conn.close()
         return events
+
+
+class ExamEvent(Event):
+    def __init__(self, User_id, title, description, date, start_time, end_time, course_name, id=None):
+        super().__init__(User_id, title, description, date, start_time, end_time, id)
+        self.course_name = course_name
+
+    def get_event_type(self):
+        return "Exam Event"
+
+    def get_details(self):
+        return f"{super().get_details()} for course: {self.course_name}"
+
+
+class MeetingEvent(Event):
+    def __init__(self, User_id, title, description, date, start_time, end_time, location, id=None):
+        super().__init__(User_id, title, description, date, start_time, end_time, id)
+        self.location = location
+
+    def get_event_type(self):
+        return "Meeting Event"
+
+    def get_details(self):
+        return f"{super().get_details()} at location: {self.location}"
