@@ -5,9 +5,12 @@ import sqlite3
 import re
 from pathlib import Path
 
+# Database setup
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / 'student_checking.db'
 
+# Configure Gemini
+# Replace "YOUR_API_KEY_HERE" with your actual API Key
 genai.configure(api_key="YOUR_API_KEY_HERE")
 model = genai.GenerativeModel('gemini-1.5-flash')
 
@@ -15,7 +18,7 @@ class AiHandler:
     @staticmethod
     def analyze_screenshot(image_path, current_user_id):
         """
-        Ders programı ekran görüntüsünü analiz eder ve dersleri veritabanına kaydeder.
+        Analyzes the course schedule screenshot and saves lessons to the database.
         """
         try:
             img = Image.open(image_path)
@@ -23,7 +26,6 @@ class AiHandler:
             prompt = """
             Analyze this course schedule image and extract all lessons. 
             Return ONLY a JSON list in the following format:
-
             [
                 {
                     "title": "Course Name", 
@@ -33,7 +35,6 @@ class AiHandler:
                     "end_time": "HH:MM"
                 }
             ]
-
             RULES:
             1. Output ONLY the raw JSON. No introductory text.
             2. If the date is not clear, use the dates for the current week.
@@ -43,6 +44,7 @@ class AiHandler:
             response = model.generate_content([prompt, img])
             raw_text = response.text
 
+            # Extract JSON from potential markdown markers
             json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
             
             if not json_match:
@@ -50,6 +52,7 @@ class AiHandler:
 
             events = json.loads(json_match.group())
 
+            # Database Connection
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
 
@@ -79,44 +82,8 @@ class AiHandler:
     @staticmethod
     def chat_assistant(user_message):
         """
-        Kullanıcı ile sohbet eden asistan fonksiyonu.
+        Helper function for the AI Chat Sidebar.
         """
-        chat_prompt = f"""
-        You are a helpful student assistant. 
-        Current request: {user_message}
-        Remember to stay professional and remind the user that you can make mistakes.
-        """
+        chat_prompt = f"You are a helpful student assistant. User says: {user_message}"
         response = model.generate_content(chat_prompt)
         return response.text
-
-    @app.route('/register', methods=['GET', 'POST'])
-def register():
-    errors = []
-    if request.method == 'POST':
-        username = request.form.get('username').strip()
-        password = request.form.get('password')
-        # UserID oluşturma (Benzersiz numara)
-        import uuid
-        user_id = uuid.uuid4().int & ((1 << 31) - 1)
-        
-        if User.register_user(username, password, user_id):
-            return redirect(url_for('login'))
-        else:
-            errors.append("This username is already taken.")
-    return render_template('register.html', errors=errors)
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    errors = []
-    if request.method == 'POST':
-        username = request.form.get('username').strip()
-        password = request.form.get('password')
-        
-        user = User.login(username, password)
-        if user:
-            session['user_id'] = user[0] # user_id'yi saklar
-            session['username'] = user[1] # username'i saklar
-            return redirect(url_for('dashboard'))
-        else:
-            errors.append("Invalid username or password.")
-    return render_template('login.html', errors=errors)
