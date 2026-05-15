@@ -1,6 +1,5 @@
-
 from flask import Flask, render_template, request, redirect, url_for, session
-from UserClass import User # UserClass.py dosyanın olduğunu varsayıyorum
+from UserClass import User
 import uuid
 import os
 
@@ -42,7 +41,6 @@ def login():
             
     return render_template('login.html', errors=errors)
 
-# Dashboard ve Logout rotalarını da buraya eklemeyi unutma!
 
 if __name__ == '__main__':
     app.run(debug=True)

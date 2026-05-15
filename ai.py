@@ -9,8 +9,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / 'student_checking.db'
 
-# Configure Gemini
-# Replace "YOUR_API_KEY_HERE" with your actual API Key
+# Replace "YOUR_API_KEY_HERE" 
 genai.configure(api_key="YOUR_API_KEY_HERE")
 model = genai.GenerativeModel('gemini-1.5-flash')
 
@@ -82,7 +81,7 @@ class AiHandler:
     @staticmethod
     def chat_assistant(user_message):
         """
-        Helper function for the AI Chat Sidebar.
+        Helper function for the AI Chat.
         """
         chat_prompt = f"You are a helpful student assistant. User says: {user_message}"
         response = model.generate_content(chat_prompt)
