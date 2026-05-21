@@ -2,16 +2,14 @@ import google.generativeai as genai
 from PIL import Image
 import json
 import sqlite3
-import re
 from pathlib import Path
 
-# Database setup
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / 'student_checking.db'
 
-# Replace "YOUR_API_KEY_HERE" 
 genai.configure(api_key="YOUR_API_KEY_HERE")
 model = genai.GenerativeModel('gemini-1.5-flash')
+
 
 class AiHandler:
     @staticmethod
@@ -35,7 +33,7 @@ class AiHandler:
                 }
             ]
             RULES:
-            1. Output ONLY the raw JSON. No introductory text.
+            1. Output ONLY the raw JSON. No introductory text. No markdown format.
             2. If the date is not clear, use the dates for the current week.
             3. Use 24-hour time format (e.g., 14:30).
             """
@@ -43,13 +41,14 @@ class AiHandler:
             response = model.generate_content([prompt, img])
             raw_text = response.text
 
-            # Extract JSON from potential markdown markers
-            json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-            
-            if not json_match:
+            start_index = raw_text.find('[')
+            end_index = raw_text.rfind(']') + 1
+
+            if start_index == -1 or end_index == 0:
                 return False, "AI could not find structured data in the image."
 
-            events = json.loads(json_match.group())
+            json_str = raw_text[start_index:end_index]
+            events = json.loads(json_str)
 
             # Database Connection
             conn = sqlite3.connect(DB_PATH)
@@ -61,11 +60,11 @@ class AiHandler:
                     INSERT INTO events (user_id, title, description, date, start_time, end_time) 
                     VALUES (?, ?, ?, ?, ?, ?)
                 ''', (
-                    current_user_id, 
-                    e['title'], 
-                    e.get('description', ''), 
-                    e['date'], 
-                    e['start_time'], 
+                    current_user_id,
+                    e['title'],
+                    e.get('description', ''),
+                    e['date'],
+                    e['start_time'],
                     e['end_time']
                 ))
                 added_count += 1

@@ -1,5 +1,6 @@
 import sqlite3
 from pathlib import Path
+from werkzeug.security import generate_password_hash, check_password_hash  # DÜZELTME: Güvenlik için eklendi
 
 DB_PATH = Path(__file__).with_name('student_checking.db')
 
@@ -24,8 +25,10 @@ class User:
         if cursor.fetchone():
             conn.close()
             return False
+
+        hashed_password = generate_password_hash(password)
         cursor.execute('INSERT INTO users (user_id, username, password) VALUES (?, ?, ?)',
-                      (user_id, username, password))
+                       (user_id, username, hashed_password))
         conn.commit()
         conn.close()
         return True
@@ -34,8 +37,10 @@ class User:
     def login(username, password):
         conn = User.get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password))
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
         user = cursor.fetchone()
         conn.close()
-        return user is not None
 
+        if user and check_password_hash(user[2], password):
+            return user
+        return None

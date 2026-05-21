@@ -1,14 +1,13 @@
 import sqlite3
 from pathlib import Path
 
-
 DB_PATH = Path(__file__).with_name('student_checking.db')
 
 
 class Event:
-    def __init__(self, User_id, title, description, date, start_time, end_time, id=None):
-        self.User_id = User_id
+    def __init__(self, user_id, title, description, date, start_time, end_time, id=None):
         self.id = id
+        self.user_id = user_id
         self.title = title
         self.description = description
         self.date = date
@@ -31,12 +30,12 @@ class Event:
         return conn
 
     @staticmethod
-    def add_event(user_id, id, title, description, date, start_time, end_time):
+    def add_event(user_id, title, description, date, start_time, end_time):
         conn = Event.get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO events (id, user_id, title, description, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (id, user_id, title, description, date, start_time, end_time)
+            'INSERT INTO events (user_id, title, description, date, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?)',
+            (user_id, title, description, date, start_time, end_time)
         )
         conn.commit()
         conn.close()
