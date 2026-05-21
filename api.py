@@ -135,5 +135,32 @@ def ai_chat():
     return jsonify({"response": ai_response})
 
 
+@app.route('/api/upload_schedule', methods=['POST'])
+def upload_schedule():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+    if 'schedule_image' not in request.files:
+        return jsonify({"success": False, "error": "Fotoğraf bulunamadı."}), 400
+
+    file = request.files['schedule_image']
+    if file.filename == '':
+        return jsonify({"success": False, "error": "Dosya seçilmedi."}), 400
+
+    if file:
+        temp_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "temp_schedule.png")
+        file.save(temp_path)
+
+        success, message = AiHandler.analyze_screenshot(temp_path, session['user_id'])
+
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        if success:
+            return jsonify({"success": True, "message": message})
+        else:
+            return jsonify({"success": False, "error": message}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True)
